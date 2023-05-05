@@ -1,0 +1,143 @@
+                            | # 杨征 521021910478
+                            | # I use iaddq, loop unrolling and binary search to optimize the code. 
+                            | # More specifically, I handle the array 8 at a time, then 4, then 2, then 1. 
+                            | # I tidied up the code so the original comments are gone
+0x000:                      | ncopy:
+0x000: c0f2ffffffffffffffff |     iaddq $-1, %rdx
+0x00a: 743d00000000000000   |     jne Start
+0x013: 50c70000000000000000 |     mrmovq (%rdi), %r12	# 
+0x01d: 62cc                 | 	andq %r12, %r12		
+0x01f: 713200000000000000   | 	jle Count		
+0x028: c0f00100000000000000 | 	iaddq $1, %rax 		
+0x032:                      | Count:
+0x032: 40c60000000000000000 | 	rmmovq %r12, (%rsi)	# ...and store it to dst
+0x03c: 90                   | 	ret
+                            | 
+0x03d:                      | Start:
+0x03d: c0f2f9ffffffffffffff |     iaddq $-7, %rdx
+                            |     # jge Eight
+0x047: 72bf01000000000000   |     jl Four_start
+0x050:                      | Eight:
+0x050: 50870000000000000000 |     mrmovq (%rdi), %r8
+0x05a: 50970800000000000000 |     mrmovq 8(%rdi), %r9
+0x064: 50a71000000000000000 |     mrmovq 16(%rdi), %r10
+0x06e: 50b71800000000000000 |     mrmovq 24(%rdi), %r11
+0x078: 50c72000000000000000 |     mrmovq 32(%rdi), %r12
+0x082: 50d72800000000000000 |     mrmovq 40(%rdi), %r13
+0x08c: 50e73000000000000000 |     mrmovq 48(%rdi), %r14
+0x096: 50173800000000000000 |     mrmovq 56(%rdi), %rcx
+                            |     # update count , count ++ if val > 0
+0x0a0: 6288                 |     andq %r8, %r8
+0x0a2: 71b500000000000000   |     jle Eight_one
+0x0ab: c0f00100000000000000 |     iaddq $1, %rax
+0x0b5:                      | Eight_one:
+0x0b5: 6299                 |     andq %r9, %r9
+0x0b7: 71ca00000000000000   |     jle Eight_two
+0x0c0: c0f00100000000000000 |     iaddq $1, %rax
+0x0ca:                      | Eight_two:
+0x0ca: 62aa                 |     andq %r10, %r10
+0x0cc: 71df00000000000000   |     jle Eight_three
+0x0d5: c0f00100000000000000 |     iaddq $1, %rax
+0x0df:                      | Eight_three:
+0x0df: 62bb                 |     andq %r11, %r11
+0x0e1: 71f400000000000000   |     jle Eight_four
+0x0ea: c0f00100000000000000 |     iaddq $1, %rax
+0x0f4:                      | Eight_four:
+0x0f4: 62cc                 |     andq %r12, %r12
+0x0f6: 710901000000000000   |     jle Eight_five
+0x0ff: c0f00100000000000000 |     iaddq $1, %rax
+0x109:                      | Eight_five:
+0x109: 62dd                 |     andq %r13, %r13
+0x10b: 711e01000000000000   |     jle Eight_six
+0x114: c0f00100000000000000 |     iaddq $1, %rax
+0x11e:                      | Eight_six:
+0x11e: 62ee                 |     andq %r14, %r14
+0x120: 713301000000000000   |     jle Eight_seven
+0x129: c0f00100000000000000 |     iaddq $1, %rax
+0x133:                      | Eight_seven:
+0x133: 6211                 |     andq %rcx, %rcx
+0x135: 714801000000000000   |     jle Eight_eight
+0x13e: c0f00100000000000000 |     iaddq $1, %rax
+0x148:                      | Eight_eight:
+0x148: 40860000000000000000 |     rmmovq %r8, (%rsi)
+0x152: 40960800000000000000 |     rmmovq %r9, 8(%rsi)
+0x15c: 40a61000000000000000 |     rmmovq %r10, 16(%rsi)
+0x166: 40b61800000000000000 |     rmmovq %r11, 24(%rsi)
+0x170: 40c62000000000000000 |     rmmovq %r12, 32(%rsi)
+0x17a: 40d62800000000000000 |     rmmovq %r13, 40(%rsi)
+0x184: 40e63000000000000000 |     rmmovq %r14, 48(%rsi)
+0x18e: 40163800000000000000 |     rmmovq %rcx, 56(%rsi)
+0x198: c0f74000000000000000 |     iaddq $64, %rdi
+0x1a2: c0f64000000000000000 |     iaddq $64, %rsi
+0x1ac: c0f2f8ffffffffffffff |     iaddq $-8, %rdx 
+0x1b6: 755000000000000000   |     jge Eight
+                            | 
+0x1bf:                      | Four_start:
+0x1bf: c0f20400000000000000 |     iaddq $4, %rdx
+0x1c9: 729402000000000000   |     jl Two
+0x1d2:                      | Four:
+0x1d2: 50870000000000000000 |     mrmovq (%rdi), %r8
+0x1dc: 50970800000000000000 |     mrmovq 8(%rdi), %r9
+0x1e6: 50a71000000000000000 |     mrmovq 16(%rdi), %r10
+0x1f0: 50b71800000000000000 |     mrmovq 24(%rdi), %r11
+                            |     # update count , count ++ if val > 0
+0x1fa: 6288                 |     andq %r8, %r8
+0x1fc: 710f02000000000000   |     jle Four_one
+0x205: c0f00100000000000000 |     iaddq $1, %rax
+0x20f:                      | Four_one:
+0x20f: 6299                 |     andq %r9, %r9
+0x211: 712402000000000000   |     jle Four_two
+0x21a: c0f00100000000000000 |     iaddq $1, %rax
+0x224:                      | Four_two:
+0x224: 62aa                 |     andq %r10, %r10
+0x226: 713902000000000000   |     jle Four_three
+0x22f: c0f00100000000000000 |     iaddq $1, %rax
+0x239:                      | Four_three:
+0x239: 62bb                 |     andq %r11, %r11
+0x23b: 714e02000000000000   |     jle Four_four
+0x244: c0f00100000000000000 |     iaddq $1, %rax
+0x24e:                      | Four_four:
+0x24e: 40860000000000000000 |     rmmovq %r8, (%rsi)
+0x258: 40960800000000000000 |     rmmovq %r9, 8(%rsi)
+0x262: 40a61000000000000000 |     rmmovq %r10, 16(%rsi)
+0x26c: 40b61800000000000000 |     rmmovq %r11, 24(%rsi)
+0x276: c0f72000000000000000 |     iaddq $32, %rdi
+0x280: c0f62000000000000000 |     iaddq $32, %rsi
+0x28a: c0f2fcffffffffffffff |     iaddq $-4, %rdx # len -= 4
+                            |     
+0x294:                      | Two:
+0x294: c0f20200000000000000 |     iaddq $2, %rdx
+0x29e: 721703000000000000   |     jl One
+0x2a7: 50870000000000000000 |     mrmovq (%rdi), %r8
+0x2b1: 50970800000000000000 |     mrmovq 8(%rdi), %r9
+                            |     # update count , count ++ if val > 0
+0x2bb: 6288                 |     andq %r8, %r8
+0x2bd: 71d002000000000000   |     jle Two_one
+0x2c6: c0f00100000000000000 |     iaddq $1, %rax
+0x2d0:                      | Two_one:
+0x2d0: 6299                 |     andq %r9, %r9
+0x2d2: 71e502000000000000   |     jle Two_two
+0x2db: c0f00100000000000000 |     iaddq $1, %rax
+0x2e5:                      | Two_two:
+0x2e5: 40860000000000000000 |     rmmovq %r8, (%rsi)
+0x2ef: 40960800000000000000 |     rmmovq %r9, 8(%rsi)
+0x2f9: c0f71000000000000000 |     iaddq $16, %rdi
+0x303: c0f61000000000000000 |     iaddq $16, %rsi
+0x30d: c0f2feffffffffffffff |     iaddq $-2, %rdx # len -= 1
+                            | 
+0x317:                      | One:
+0x317: c0f20200000000000000 |     iaddq $2, %rdx
+0x321: 735303000000000000   |     je End
+0x32a: 50870000000000000000 |     mrmovq (%rdi), %r8
+                            |     # update count , count ++ if val > 0
+0x334: 6288                 |     andq %r8, %r8
+0x336: 714903000000000000   |     jle One_one
+0x33f: c0f00100000000000000 |     iaddq $1, %rax
+0x349:                      | One_one:
+0x349: 40860000000000000000 |     rmmovq %r8, (%rsi)
+                            |     # iaddq $8, %rdi
+                            |     # iaddq $8, %rsi
+                            |     # iaddq $-1, %rdx # len -= 1
+0x353:                      | End:
+0x353: 90                   |     ret
+                            | 

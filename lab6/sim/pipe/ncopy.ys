@@ -1,0 +1,143 @@
+# 杨征 521021910478
+# I use iaddq, loop unrolling and binary search to optimize the code. 
+# More specifically, I handle the array 8 at a time, then 4, then 2, then 1. 
+# I tidied up the code so the original comments are gone
+ncopy:
+    iaddq $-1, %rdx
+    jne Start
+    mrmovq (%rdi), %r12	# 
+	andq %r12, %r12		
+	jle Count		
+	irmovq $1, %rax		# count = 1		
+Count:
+	rmmovq %r12, (%rsi)	# ...and store it to dst
+	ret
+
+Start:
+    iaddq $-7, %rdx
+    # jge Eight
+    jl Four_start
+Eight:
+    mrmovq (%rdi), %r8
+    mrmovq 8(%rdi), %r9
+    mrmovq 16(%rdi), %r10
+    mrmovq 24(%rdi), %r11
+    mrmovq 32(%rdi), %r12
+    mrmovq 40(%rdi), %r13
+    mrmovq 48(%rdi), %r14
+    mrmovq 56(%rdi), %rcx
+    # update count , count ++ if val > 0
+    andq %r8, %r8
+    jle Eight_one
+    iaddq $1, %rax
+Eight_one:
+    andq %r9, %r9
+    jle Eight_two
+    iaddq $1, %rax
+Eight_two:
+    andq %r10, %r10
+    jle Eight_three
+    iaddq $1, %rax
+Eight_three:
+    andq %r11, %r11
+    jle Eight_four
+    iaddq $1, %rax
+Eight_four:
+    andq %r12, %r12
+    jle Eight_five
+    iaddq $1, %rax
+Eight_five:
+    andq %r13, %r13
+    jle Eight_six
+    iaddq $1, %rax
+Eight_six:
+    andq %r14, %r14
+    jle Eight_seven
+    iaddq $1, %rax
+Eight_seven:
+    andq %rcx, %rcx
+    jle Eight_eight
+    iaddq $1, %rax
+Eight_eight:
+    rmmovq %r8, (%rsi)
+    rmmovq %r9, 8(%rsi)
+    rmmovq %r10, 16(%rsi)
+    rmmovq %r11, 24(%rsi)
+    rmmovq %r12, 32(%rsi)
+    rmmovq %r13, 40(%rsi)
+    rmmovq %r14, 48(%rsi)
+    rmmovq %rcx, 56(%rsi)
+    iaddq $64, %rdi
+    iaddq $64, %rsi
+    iaddq $-8, %rdx 
+    jge Eight
+
+Four_start:
+    iaddq $4, %rdx
+    jl Two
+Four:
+    mrmovq (%rdi), %r8
+    mrmovq 8(%rdi), %r9
+    mrmovq 16(%rdi), %r10
+    mrmovq 24(%rdi), %r11
+    # update count , count ++ if val > 0
+    andq %r8, %r8
+    jle Four_one
+    iaddq $1, %rax
+Four_one:
+    andq %r9, %r9
+    jle Four_two
+    iaddq $1, %rax
+Four_two:
+    andq %r10, %r10
+    jle Four_three
+    iaddq $1, %rax
+Four_three:
+    andq %r11, %r11
+    jle Four_four
+    iaddq $1, %rax
+Four_four:
+    rmmovq %r8, (%rsi)
+    rmmovq %r9, 8(%rsi)
+    rmmovq %r10, 16(%rsi)
+    rmmovq %r11, 24(%rsi)
+    iaddq $32, %rdi
+    iaddq $32, %rsi
+    iaddq $-4, %rdx # len -= 4
+    
+Two:
+    iaddq $2, %rdx
+    jl One
+    mrmovq (%rdi), %r8
+    mrmovq 8(%rdi), %r9
+    # update count , count ++ if val > 0
+    andq %r8, %r8
+    jle Two_one
+    iaddq $1, %rax
+Two_one:
+    andq %r9, %r9
+    jle Two_two
+    iaddq $1, %rax
+Two_two:
+    rmmovq %r8, (%rsi)
+    rmmovq %r9, 8(%rsi)
+    iaddq $16, %rdi
+    iaddq $16, %rsi
+    iaddq $-2, %rdx # len -= 1
+
+One:
+    iaddq $2, %rdx
+    je Done
+    mrmovq (%rdi), %r8
+    # update count , count ++ if val > 0
+    andq %r8, %r8
+    jle One_one
+    iaddq $1, %rax
+One_one:
+    rmmovq %r8, (%rsi)
+    # iaddq $8, %rdi
+    # iaddq $8, %rsi
+    # iaddq $-1, %rdx # len -= 1
+Done:
+    ret
+

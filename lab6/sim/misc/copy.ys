@@ -1,0 +1,67 @@
+# 杨征，521021910478
+
+.pos 0
+init:
+    irmovq Stack, %rsp
+    irmovq Stack, %rbp
+    call Main
+    halt
+
+.align 8
+# Source block
+src:
+    .quad 0x00a
+    .quad 0x0b0
+    .quad 0xc00
+# Destination block
+dest:
+    .quad 0x111
+    .quad 0x222
+    .quad 0x333
+
+Main:
+    pushq %rbp
+    rrmovq %rsp, %rbp
+    # call copy_block
+    irmovq src, %rdi
+    irmovq dest, %rsi
+    irmovq $3, %rdx
+    call copy_block
+    # return result
+    rrmovq %rbp, %rsp
+    popq %rbp
+    ret
+
+copy_block:
+    pushq %rbp
+    rrmovq %rsp, %rbp
+    # result = 0
+    irmovq $0, %rax
+loop:
+    # while (len > 0)
+    andq %rdx, %rdx
+    je end
+    # long val = *src++;
+    mrmovq (%rdi), %rbx
+    irmovq $8, %rcx
+    addq %rcx, %rdi
+    # *dest++ = val;
+    irmovq $8, %rcx
+    addq %rcx, %rsi
+    rmmovq %rbx, (%rsi)
+    # result ^= val;
+    xorq %rbx, %rax
+    # len--;
+    irmovq $1, %rcx
+    subq %rcx, %rdx
+    jmp loop
+end:
+    # return result
+    rrmovq %rbp, %rsp
+    popq %rbp
+    ret
+
+    
+.pos 0x200
+Stack:
+

@@ -1,0 +1,57 @@
+.pos 0:
+init:
+    irmovq Stack, %rsp
+    irmovq Stack, %rbp
+    call Main
+    halt
+
+# Sample linked list
+.align 8
+ele1:
+    .quad 0x00a
+    .quad ele2
+ele2:
+    .quad 0x0b0
+    .quad ele3
+ele3:
+    .quad 0xc00
+    .quad 0
+
+#call rsum_list
+Main:
+    pushq %rbp
+    rrmovq %rsp, %rbp
+    pushq %r8
+    pushq %r9
+    irmovq ele1, %rdi
+    call rsum_list
+    popq %r9
+    popq %r8
+    rrmovq %rbp, %rsp
+    popq %rbp
+    ret
+
+# recursively sum the list, %rdi stores
+rsum_list:
+    pushq %rbp
+    rrmovq %rsp, %rbp
+    andq %rdi, %rdi
+    je default
+    pushq %rdi
+    mrmovq 8(%rdi), %rdi
+    call rsum_list
+    popq %rdi
+    mrmovq 0(%rdi), %r8
+    addq %r8, %rax
+    rrmovq %rbp, %rsp
+    popq %rbp
+    ret
+
+default:
+    irmovq $0, %rax
+    rrmovq %rbp, %rsp
+    popq %rbp
+    ret
+
+.pos 0x200:
+Stack:

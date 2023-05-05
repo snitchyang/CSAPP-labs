@@ -1,0 +1,184 @@
+# 杨征 521021910478
+# I use an loop unrolling here to optimize the baseline code. 
+# The baseline code is a loop, and the loop body is to copy one word from src to dst.
+# I unroll the loop to copy two words each time
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# Describe how and why you modified the baseline code.
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+# Translate the c code in ncopy.c to Y86 assembly code
+	# Loop header
+	# enter the loop if len >= 4, not modify the %rdx
+
+	iaddq $-1, %rdx		# len -= 1
+	jne Start
+	mrmovq (%rdi), %r12	# read val from src...
+	andq %r12, %r12		# val <= 0?
+	jle Count		# if so, goto Count:
+	iaddq $1, %rax 		# count++
+Count:
+	rmmovq %r12, (%rsi)	# ...and store it to dst
+	ret
+
+Start:
+	iaddq $-5, %rdx		# len -= 6
+	jge Six		# if so, goto Loop
+	jl Five
+
+# iaddq added to add an immediate value to a register
+Six:	
+	mrmovq (%rdi), %r8	# read val from src...
+	mrmovq 8(%rdi), %r9	# read val from src...
+	mrmovq 16(%rdi), %r10	# read val from src...
+	mrmovq 24(%rdi), %r11	# read val from src...
+	mrmovq 32(%rdi), %r12	# read val from src...
+	mrmovq 40(%rdi), %r13	# read val from src...
+	# update count, count++ if val > 0
+	andq %r8, %r8
+	jle Npos1
+	iaddq $1, %rax
+Npos1:
+	andq %r9, %r9
+	jle Npos2
+	iaddq $1, %rax
+Npos2:
+	andq %r10, %r10
+	jle Npos3
+	iaddq $1, %rax
+Npos3:
+	andq %r11, %r11
+	jle Npos4
+	iaddq $1, %rax
+Npos4:
+	andq %r12, %r12
+	jle Npos5
+	iaddq $1, %rax
+Npos5:
+	andq %r13, %r13
+	jle Npos6
+	iaddq $1, %rax
+Npos6:
+	rmmovq %r8, (%rsi)	# ...and store it to dst
+	rmmovq %r9, 8(%rsi)	# ...and store it to dst
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	rmmovq %r11, 24(%rsi)	# ...and store it to dst
+	rmmovq %r12, 32(%rsi)	# ...and store it to dst
+	rmmovq %r13, 40(%rsi)	# ...and store it to dst
+	# update src and dst
+	iaddq $48, %rdi
+	iaddq $48, %rsi
+	iaddq $-6, %rdx		# len -= 6
+	jge Six
+
+Five:
+	# iaddq $6, %rdx		# len += 6
+	# # Do another step of copying if len >= 3
+	# iaddq $-5, %rdx		# len -= 5
+	iaddq $1, %rdx		# len = len + 6 - 5
+	jl Three
+	mrmovq (%rdi), %r8	# read val from src...
+	mrmovq 8(%rdi), %r9	# read val from src...
+	mrmovq 16(%rdi), %r10	# read val from src...
+	mrmovq 24(%rdi), %r11	# read val from src...
+	mrmovq 32(%rdi), %r12	# read val from src...
+	# update count, count++ if val > 0
+	andq %r8, %r8
+	jle Five_one
+	iaddq $1, %rax
+Five_one:
+	andq %r9, %r9
+	jle Five_two
+	iaddq $1, %rax
+Five_two:
+	andq %r10, %r10
+	jle Five_three
+	iaddq $1, %rax
+Five_three:
+	andq %r11, %r11
+	jle Five_four
+	iaddq $1, %rax
+Five_four:
+	andq %r12, %r12
+	jle Five_five
+	iaddq $1, %rax
+Five_five:
+	rmmovq %r8, (%rsi)	# ...and store it to dst
+	rmmovq %r9, 8(%rsi)	# ...and store it to dst
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	rmmovq %r11, 24(%rsi)	# ...and store it to dst
+	rmmovq %r12, 32(%rsi)	# ...and store it to dst
+	# update src and dst
+	iaddq $40, %rdi
+	iaddq $40, %rsi
+	iaddq $-5, %rdx		# len -= 5
+	jl Three
+	jge Five
+Three:
+	# iaddq $5, %rdx		# len += 5
+	# iaddq $-3, %rdx		# len -= 3
+	iaddq $2, %rdx		# len = len + 5 - 3
+	jl One
+	mrmovq (%rdi), %r8	# read val from src...
+	mrmovq 8(%rdi), %r9	# read val from src...
+	mrmovq 16(%rdi), %r10	# read val from src...
+	# update count, count++ if val > 0
+	andq %r8, %r8
+	jle Three_one
+	iaddq $1, %rax
+Three_one:
+	andq %r9, %r9
+	jle Three_two
+	iaddq $1, %rax
+Three_two:
+	andq %r10, %r10
+	jle Three_three
+	iaddq $1, %rax
+Three_three:
+	rmmovq %r8, (%rsi)	# ...and store it to dst
+	rmmovq %r9, 8(%rsi)	# ...and store it to dst
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	# update src and dst
+	iaddq $24, %rdi
+	iaddq $24, %rsi
+	iaddq $-3, %rdx		# len -= 3
+	jl One
+	jge Three
+One:
+	iaddq $3, %rdx		# len += 3
+	# Do another step of copying if len >= 1
+	andq %rdx, %rdx
+	je Done
+Default:
+	mrmovq (%rdi), %r12	# read val from src...
+	iaddq $8, %rdi		# src++
+	rmmovq %r12, (%rsi)	# ...and store it to dst
+	andq %r12, %r12		# val <= 0?
+	jle Npos7		# if so, goto Npos6:
+	iaddq $1, %rax 		# count++
+Npos7:
+	iaddq $8, %rsi		# dst++
+	iaddq $-1, %rdx		# len--
+	jg Default
+	
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */
